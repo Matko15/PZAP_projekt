@@ -13,7 +13,7 @@ plt.rcParams["figure.figsize"] = (12, 6)
 class FitnessDataProcessor:
     """Prikupljanje, čišćenje i integracija podataka iz više izvora"""
 
-    def __init__(self, project_dir="PZAP_projekt"):
+    def __init__(self, project_dir="."):
         self.project_dir = Path(project_dir)
         self.data_dir = self.project_dir / "data"
         self.data_dir.mkdir(parents=True, exist_ok=True)
@@ -208,7 +208,6 @@ class FitnessDataProcessor:
         self.integrated_data.to_csv(path, index=False, encoding="utf-8")
         return path
 
-
 class FitnessAnalyzer:
     """Analiza integriranih podataka"""
 
@@ -377,7 +376,7 @@ class FitnessVisualizer:
 
 
 def main():
-    processor = FitnessDataProcessor(project_dir="PZAP_projekt")
+    processor = FitnessDataProcessor()
 
     kaggle_path = "data/exercises.json"
     processor.load_kaggle_json(kaggle_path)
