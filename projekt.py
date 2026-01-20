@@ -9,6 +9,7 @@ import seaborn as sns
 sns.set_style("whitegrid")
 plt.rcParams["figure.figsize"] = (12, 6)
 
+
 class FitnessDataProcessor:
     """Prikupljanje, čišćenje i integracija podataka iz više izvora"""
 
@@ -22,25 +23,14 @@ class FitnessDataProcessor:
         self.integrated_data = None
 
     def load_kaggle_json(self, filepath: str):
-        """
-        Učitaj exercises.json (Kaggle dataset, JSON format)
-
-        filepath: putanja do JSON datoteke, npr. "PZAP_projekt/data/exercises.json"
-        """
-        print(f"[LOG] Učitavam Kaggle JSON: {filepath}")
+        """Učitaj exercises.json (Kaggle dataset, JSON format)"""
         try:
             with open(filepath, "r", encoding="utf-8") as f:
                 data = json.load(f)
             df = pd.DataFrame(data)
-
-            print(f"[SUCCESS] Učitano {len(df)} vježbi iz Kaggle JSON-a")
-            print(f"[INFO] Kolone: {list(df.columns)}\n")
-
             self.kaggle_data = df
             return df
-
         except FileNotFoundError:
-            print(f"[ERROR] Ne mogu pronaći datoteku: {filepath}")
             return None
 
     def fetch_api_data(self, api_url, headers=None, params=None):
@@ -48,7 +38,6 @@ class FitnessDataProcessor:
         Dohvati podatke s javnog fitness API-ja.
         Ako ne radi, koristi sample podatke.
         """
-        print(f"[LOG] Dohvaćam podatke s API-ja: {api_url}")
         try:
             response = requests.get(api_url, headers=headers, params=params, timeout=10)
             response.raise_for_status()
@@ -58,22 +47,16 @@ class FitnessDataProcessor:
             backup_path = self.data_dir / "api_backup.json"
             with open(backup_path, "w", encoding="utf-8") as f:
                 json.dump(api_json, f, indent=2, ensure_ascii=False)
-            print(f"[SUCCESS] API podaci spremljeni u: {backup_path}")
 
             if isinstance(api_json, list):
                 df = pd.DataFrame(api_json)
             else:
                 df = pd.json_normalize(api_json)
 
-            print(f"[SUCCESS] Učitano {len(df)} vježbi iz API-ja")
-            print(f"[INFO] Kolone: {list(df.columns)}\n")
-
             self.api_data = df
             return df
 
-        except requests.exceptions.RequestException as e:
-            print(f"[ERROR] API poziv nije uspio: {e}")
-            print("[INFO] Koristim sample API podatke (offline fallback)...")
+        except requests.exceptions.RequestException:
             self.api_data = self._create_sample_api_data()
             return self.api_data
 
@@ -99,32 +82,23 @@ class FitnessDataProcessor:
                 "beginner",
             ],
         }
-        print("[INFO] Kreirani sample API podaci.\n")
         return pd.DataFrame(sample_data)
 
-
     def clean_data(self, df: pd.DataFrame, source_name="Unknown"):
-
-            print(f"[LOG] Čišćenje podataka: {source_name}")
-
-            if df is None or df.empty:
-                print("[WARN] DataFrame je prazan, preskačem.")
-                return df
-
-            scalar_cols = [
-                c for c in df.columns
-                if df[c].map(lambda x: not isinstance(x, (list, dict))).all()
-            ]
-            initial_rows = len(df)
-            df = df.drop_duplicates(subset=scalar_cols)
-            removed = initial_rows - len(df)
-            print(f"[INFO] Uklonjeno duplikata: {removed}")
-
-            for col in df.select_dtypes(include=["object"]).columns:
-                df[col] = df[col].astype(str).str.lower().str.strip()
-
-            print(f"[SUCCESS] Čišćenje gotovo, preostalo {len(df)} redova.\n")
+        if df is None or df.empty:
             return df
+
+        scalar_cols = [
+            c
+            for c in df.columns
+            if df[c].map(lambda x: not isinstance(x, (list, dict))).all()
+        ]
+        df = df.drop_duplicates(subset=scalar_cols)
+
+        for col in df.select_dtypes(include=["object"]).columns:
+            df[col] = df[col].astype(str).str.lower().str.strip()
+
+        return df
 
     def _standardize_kaggle(self):
         """
@@ -210,12 +184,8 @@ class FitnessDataProcessor:
         return df[cols]
 
     def integrate_datasets(self):
-        """
-        Integracija Kaggle + API u jedan DataFrame
-        """
-        print("[LOG] Integracija datasetova...\n")
+        """Integracija Kaggle + API u jedan DataFrame"""
         if self.kaggle_data is None or self.api_data is None:
-            print("[ERROR] Nedostaju izvori podataka (kaggle ili api).")
             return None
 
         kaggle_std = self._standardize_kaggle()
@@ -228,18 +198,16 @@ class FitnessDataProcessor:
         )
 
         self.integrated_data = integrated
-        print(f"[SUCCESS] Integracija završena, ukupno {len(integrated)} jedinstvenih vježbi.\n")
         return integrated
 
     def save_integrated_data(self, filename="integrated_fitness_data.csv"):
         if self.integrated_data is None:
-            print("[ERROR] Nema integriranih podataka za spremanje.")
             return None
 
         path = self.data_dir / filename
         self.integrated_data.to_csv(path, index=False, encoding="utf-8")
-        print(f"[SUCCESS] Integrirani podaci spremljeni u: {path}\n")
         return path
+
 
 class FitnessAnalyzer:
     """Analiza integriranih podataka"""
@@ -251,29 +219,21 @@ class FitnessAnalyzer:
     def analyze_by_muscle_group(self):
         dist = self.data["target_muscle"].value_counts()
         self.results["muscles"] = dist
-        print("[INFO] Raspodjela po mišičnim skupinama:")
-        print(dist, "\n")
         return dist
 
     def analyze_by_difficulty(self):
         dist = self.data["difficulty"].value_counts()
         self.results["difficulty"] = dist
-        print("[INFO] Raspodjela po težini (difficulty):")
-        print(dist, "\n")
         return dist
 
     def analyze_by_equipment(self):
         dist = self.data["equipment"].value_counts()
         self.results["equipment"] = dist
-        print("[INFO] Raspodjela po opremi:")
-        print(dist, "\n")
         return dist
 
     def analyze_by_source(self):
         dist = self.data["source"].value_counts()
         self.results["sources"] = dist
-        print("[INFO] Raspodjela po izvoru podataka:")
-        print(dist, "\n")
         return dist
 
     def get_training_recommendations(self, goal="strength"):
@@ -284,7 +244,6 @@ class FitnessAnalyzer:
         - full_body
         - push_pull_legs
         """
-        print(f"[LOG] Preporuke za cilj: {goal}")
         df = self.data
 
         if goal == "strength":
@@ -313,22 +272,13 @@ class FitnessAnalyzer:
             recs = df
             focus = "Opći popis vježbi."
 
-        print(f"[INFO] Broj preporučenih vježbi: {len(recs)}\n")
         return {"focus": focus, "exercises": recs, "count": len(recs)}
 
     def run_full_analysis(self):
-        print("=" * 60)
-        print("POČETAK ANALIZE PODATAKA")
-        print("=" * 60, "\n")
-
         self.analyze_by_muscle_group()
         self.analyze_by_difficulty()
         self.analyze_by_equipment()
         self.analyze_by_source()
-
-        print("=" * 60)
-        print("KRAJ ANALIZE")
-        print("=" * 60, "\n")
 
 
 class FitnessVisualizer:
@@ -348,8 +298,6 @@ class FitnessVisualizer:
         self.plot_source_comparison(out)
         self.plot_muscle_difficulty_heatmap(out)
 
-        print(f"[SUCCESS] Vizualizacije spremljene u: {out}\n")
-
     def plot_muscle_distribution(self, output_dir: Path):
         fig, ax = plt.subplots()
         muscles = self.analyzer.results["muscles"].head(15)
@@ -361,7 +309,6 @@ class FitnessVisualizer:
         path = output_dir / "01_muscle_distribution.png"
         plt.savefig(path, dpi=300, bbox_inches="tight")
         plt.close()
-        print(f"[OK] {path}")
 
     def plot_difficulty_distribution(self, output_dir: Path):
         fig, ax = plt.subplots()
@@ -379,7 +326,6 @@ class FitnessVisualizer:
         path = output_dir / "02_difficulty_distribution.png"
         plt.savefig(path, dpi=300, bbox_inches="tight")
         plt.close()
-        print(f"[OK] {path}")
 
     def plot_equipment_distribution(self, output_dir: Path):
         fig, ax = plt.subplots()
@@ -393,7 +339,6 @@ class FitnessVisualizer:
         path = output_dir / "03_equipment_distribution.png"
         plt.savefig(path, dpi=300, bbox_inches="tight")
         plt.close()
-        print(f"[OK] {path}")
 
     def plot_source_comparison(self, output_dir: Path):
         fig, ax = plt.subplots()
@@ -406,7 +351,6 @@ class FitnessVisualizer:
         path = output_dir / "04_source_comparison.png"
         plt.savefig(path, dpi=300, bbox_inches="tight")
         plt.close()
-        print(f"[OK] {path}")
 
     def plot_muscle_difficulty_heatmap(self, output_dir: Path):
         table = pd.crosstab(self.data["target_muscle"], self.data["difficulty"]).fillna(
@@ -430,23 +374,16 @@ class FitnessVisualizer:
         path = output_dir / "05_muscle_difficulty_heatmap.png"
         plt.savefig(path, dpi=300, bbox_inches="tight")
         plt.close()
-        print(f"[OK] {path}")
 
 
 def main():
-    print("\n" + "=" * 70)
-    print(" FITNESS TRENDS ANALYSIS AND TRAINING PLANNING")
-    print(" PZAP projekt - FOI Varaždin")
-    print("=" * 70 + "\n")
-
     processor = FitnessDataProcessor(project_dir="PZAP_projekt")
 
     kaggle_path = "data/exercises.json"
     processor.load_kaggle_json(kaggle_path)
 
     api_url = "https://exercisedb.p.rapidapi.com/exercises"
-    headers = {
-    }
+    headers = {}
     processor.fetch_api_data(api_url, headers=headers)
 
     if processor.kaggle_data is not None:
@@ -456,7 +393,6 @@ def main():
 
     integrated = processor.integrate_datasets()
     if integrated is None:
-        print("[FATAL] Integracija nije uspjela, izlazim...")
         return
 
     processor.save_integrated_data()
@@ -464,26 +400,12 @@ def main():
     analyzer = FitnessAnalyzer(integrated)
     analyzer.run_full_analysis()
 
-    print("=" * 60)
-    print("PREPORUKE ZA RAZLIČITE CILJEVE")
-    print("=" * 60 + "\n")
-
     for goal in ["strength", "hypertrophy", "full_body", "push_pull_legs"]:
-        recs = analyzer.get_training_recommendations(goal)
-        print(f"[{goal.upper()}] Broj vježbi: {recs['count']}")
-        print(f"  Fokus: {recs['focus']}\n")
-
-    print("=" * 60)
-    print("GENERIRAM VIZUALIZACIJE")
-    print("=" * 60 + "\n")
+        analyzer.get_training_recommendations(goal)
 
     visualizer = FitnessVisualizer(integrated, analyzer)
     visualizer.visualize_all()
 
-    print("\n" + "=" * 70)
-    print(" PROJEKT ZAVRŠEN")
-    print(" - integrirani podaci: PZAP_projekt/data/integrated_fitness_data.csv")
-    print(" - grafovi: PZAP_projekt/visualizations/")
-    print("=" * 70 + "\n")
+
 if __name__ == "__main__":
     main()
