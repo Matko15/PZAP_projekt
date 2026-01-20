@@ -1,0 +1,7 @@
+__pycache__/
+venv/
+*.pyc
+.vscode/
+*.log
+data/api_backup.json
+data/exercises.json

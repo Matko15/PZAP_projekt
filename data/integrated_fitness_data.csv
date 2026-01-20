@@ -1,0 +1,36 @@
+exercise_name,target_muscle,body_part,equipment,secondary_muscles,difficulty,source
+hack calf raise,other,other,body weight,,intermediate,kaggle
+sled 45° leg press (side pov),other,other,body weight,,intermediate,kaggle
+dumbbell front raise,other,other,body weight,,intermediate,kaggle
+dumbbell over bench revers wrist curl,other,other,body weight,,intermediate,kaggle
+barbell incline bench press,other,other,body weight,,intermediate,kaggle
+cable squatting curl,other,other,body weight,,intermediate,kaggle
+dumbbell one arm hammer preacher curl,other,other,body weight,,intermediate,kaggle
+barbell standing close grip curl,other,other,body weight,,intermediate,kaggle
+kettlebell pistol squat,other,other,body weight,,intermediate,kaggle
+impossible dips,other,other,body weight,,intermediate,kaggle
+barbell seated overhead triceps extension,other,other,body weight,,intermediate,kaggle
+smith incline bench press,other,other,body weight,,intermediate,kaggle
+weighted side bend (on stability ball),other,other,body weight,,intermediate,kaggle
+dumbbell one arm upright row,other,other,body weight,,intermediate,kaggle
+barbell standing rocking leg calf raise,other,other,body weight,,intermediate,kaggle
+barbell wrist curl v. 2,other,other,body weight,,intermediate,kaggle
+dumbbell lying single extension,other,other,body weight,,intermediate,kaggle
+dumbbell reverse spider curl,other,other,body weight,,intermediate,kaggle
+bent knee lying twist (male),other,other,body weight,,intermediate,kaggle
+lever front pulldown,other,other,body weight,,intermediate,kaggle
+lever seated row,other,other,body weight,,intermediate,kaggle
+dumbbell standing concentration curl,other,other,body weight,,intermediate,kaggle
+cable decline fly,other,other,body weight,,intermediate,kaggle
+smith leg press,other,other,body weight,,intermediate,kaggle
+dumbbell palms in incline bench press,other,other,body weight,,intermediate,kaggle
+assisted hanging knee raise with throw down,other,other,body weight,,intermediate,kaggle
+cable seated curl,other,other,body weight,,intermediate,kaggle
+barbell standing calf raise,other,other,body weight,,intermediate,kaggle
+weighted hyperextension (on stability ball),other,other,body weight,,intermediate,kaggle
+cable seated crunch,other,other,body weight,,intermediate,kaggle
+barbell bench press,chest,chest,barbell,,intermediate,api
+deadlift,back,back,barbell,,advanced,api
+barbell squat,legs,legs,barbell,,intermediate,api
+pull-ups,back,back,bodyweight,,intermediate,api
+dumbbell rows,back,back,dumbbell,,beginner,api
